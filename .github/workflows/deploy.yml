@@ -19,8 +19,6 @@ jobs:
             command: |
               sudo apt update    
               cd /home/ubuntu
-              git clone -b master https://github.com/parandev/beating-stick-backend.git
-              git pull origin master
               cd /home/ubuntu/beating-stick-backend
               python3 -m venv venv
               source venv/bin/activate
