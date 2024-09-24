@@ -13,21 +13,21 @@ jobs:
         - name: Checkout code
           uses: actions/checkout@v2
 
-        - name: deploy via ssh
-          uses: fifsky/ssh-action@master
-          with:
-            command: |
-              sudo apt update    
-              cd /home/ubuntu
-              cd /home/ubuntu/beating-stick-backend
-              python3 -m venv venv
-              source venv/bin/activate
-              pip install -r requirements.txt
-              python manage.py runserver
-              sudo systemctl apache2 restart
-            host: ${{ secrets.HOST }}
-            user: ubuntu
-            key: ${{ secrets.EC2_KEY_PAIR}}
+        # - name: deploy via ssh
+        #   uses: fifsky/ssh-action@master
+        #   with:
+        #     command: |
+        #       sudo apt update    
+        #       cd /home/ubuntu
+        #       cd /home/ubuntu/beating-stick-backend
+        #       python3 -m venv venv
+        #       source venv/bin/activate
+        #       pip install -r requirements.txt
+        #       python manage.py runserver
+        #       sudo systemctl apache2 restart
+        #     host: ${{ secrets.HOST }}
+        #     user: ubuntu
+        #     key: ${{ secrets.EC2_KEY_PAIR}}
 
         # - name: Set up Python
         #   uses: actions/setup-python@v2
@@ -46,21 +46,21 @@ jobs:
             #     aws-secret-access-key: 
         #         aws-region: us-east-1
 
-        # - name: Deploy to EC2
-        #   env:
-        #     PRIVATE_KEY: ${{ secrets.EC2_KEY_PAIR }}
-        #     HOSTNAME: ${{secrets.HOST}}
-        #   run: |
-        #     echo "${PRIVATE_KEY}" > private_key && chmod 600 private_key
-        #     ssh -o StrictHostKeyChecking=no -i ${PRIVATE_KEY} ubuntu@${HOSTNAME} << 'EOF'
-        #       sudo apt update    
-        #       cd /home/ubuntu
-        #       git clone -b main git@github.com:parandev/beating-stick-backend.git
-        #       git pull origin master
-        #       cd /home/ubuntu/beating-stick-backend
-        #       python3 -m venv venv
-        #       source venv/bin/activate
-        #       pip install -r requirements.txt
-        #       python manage.py runserver
-        #       sudo systemctl apache2 restart
-        #     EOF
+        - name: Deploy to EC2
+          # env:
+          #   PRIVATE_KEY: ${{ secrets.EC2_KEY_PAIR }}
+          #   HOSTNAME: ${{secrets.HOST}}
+          run: |
+            echo "${{ secrets.EC2_KEY_PAIR }}" > private_key && chmod 600 private_key
+            ssh -o StrictHostKeyChecking=no -i ${{ secrets.EC2_KEY_PAIR }} ubuntu@${{secrets.HOST}} << 'EOF'
+              sudo apt update    
+              cd /home/ubuntu
+              git clone -b main git@github.com:parandev/beating-stick-backend.git
+              git pull origin master
+              cd /home/ubuntu/beating-stick-backend
+              python3 -m venv venv
+              source venv/bin/activate
+              pip install -r requirements.txt
+              python manage.py runserver
+              sudo systemctl apache2 restart
+            EOF
