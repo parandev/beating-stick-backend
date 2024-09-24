@@ -1,0 +1,50 @@
+name: Deploy FastAPI to AWS EC2
+
+on:
+    push:
+        branches:
+            - master
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+
+        steps:
+        - name: Checkout code
+          uses: actions/checkout@v2
+
+        # - name: Set up Python
+        #   uses: actions/setup-python@v2
+        #   with:
+        #      python-version: '3.10'
+
+        - name: Install dependencies
+          run: |
+              python3 -m pip install --upgrade pip
+              pip install -r requirements.txt
+
+        # - name: Configure AWS credentials
+        #     uses: aws-actions/configure-aws-credentials@v1
+            # with:
+            #     aws-access-key-id: 
+            #     aws-secret-access-key: 
+        #         aws-region: us-east-1
+
+        - name: Deploy to EC2
+          env:
+            PRIVATE_KEY: ${{ secrets.EC2_KEY_PAIR }}
+            HOSTNAME: ${{secrets.HOST}}
+          run: |
+            echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+            ssh -o StrictHostKeyChecking=no -i ${PRIVATE_KEY} ec2-user@${HOSTNAME} << 'EOF'
+              sudo apt update    
+              cd /home/ubuntu
+              git clone -b main git@github.com:parandev/beating-stick-backend.git
+              git pull origin master
+              cd /home/ubuntu/beating-stick-backend
+              python3 -m venv venv
+              source venv/bin/activate
+              pip install -r requirements.txt
+              python manage.py runserver
+              sudo systemctl apache2 restart
+            EOF
