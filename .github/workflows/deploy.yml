@@ -51,7 +51,7 @@ jobs:
           #   PRIVATE_KEY: ${{ secrets.EC2_KEY_PAIR }}
           #   HOSTNAME: ${{secrets.HOST}}
           run: |
-            echo "${{ secrets.EC2_KEY_PAIR }}" > private_key && chmod 600 private_key
+            # echo ${{ secrets.EC2_KEY_PAIR }} > private_key && chmod 600 private_key
             ssh -o StrictHostKeyChecking=no -i ${{ secrets.EC2_KEY_PAIR }} ubuntu@${{secrets.HOST}} << 'EOF'
               sudo apt update    
               cd /home/ubuntu
